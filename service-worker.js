@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/overcook/precache-manifest.4c95a9f8caa3befe8c35abdf0e349226.js"
+  "/overcook/precache-manifest.feabe1aeae0789e7fdd2afe302048195.js"
 );
 
 workbox.clientsClaim();

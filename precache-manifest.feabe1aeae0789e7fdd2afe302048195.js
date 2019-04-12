@@ -4,19 +4,19 @@ self.__precacheManifest = [
     "url": "/overcook/static/js/runtime~main.fd020156.js"
   },
   {
-    "revision": "dff1c606b0e6c317c657",
-    "url": "/overcook/static/js/main.7009286c.chunk.js"
+    "revision": "c550e6bab41a4f5d82d9",
+    "url": "/overcook/static/js/main.031572fa.chunk.js"
   },
   {
     "revision": "861892db95cb65ba8ee6",
     "url": "/overcook/static/js/2.73a4873d.chunk.js"
   },
   {
-    "revision": "dff1c606b0e6c317c657",
+    "revision": "c550e6bab41a4f5d82d9",
     "url": "/overcook/static/css/main.aaf809cd.chunk.css"
   },
   {
-    "revision": "91282e36df771e0a580083fbafacfcbc",
+    "revision": "850a9b2c15e1400a0844746af498fd24",
     "url": "/overcook/index.html"
   }
 ];
