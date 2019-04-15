@@ -8,8 +8,12 @@ class Ingredients extends Component {
   clickBlock(e,id,name,own){
     //console.log(name)
     if(this.props.deleteMode){
-      if(own===true)
+      if(own)
         this.props.removeIngredient(name);}
+    else if(this.props.updateMode){
+      if(own)
+        this.props.updateIngredient(name);
+    }
     else
       this.props.updateQueue(name);
   }
@@ -38,7 +42,8 @@ class Ingredients extends Component {
     var listArrRender = listArr.map(x=>this.createList(x,true));
     var listArrRender2 = listArr2.map(x=>this.createList(x,false));
     let removeButtonStyle = (this.props.deleteMode)? "remove-ingredient-clicked" : "remove-ingredient";
-    let userIngredientsListStyle = (this.props.deleteMode)? {border: "3px solid #c20616"} : {};
+    let updateButtonStyle = (this.props.updateMode)? "update-ingredient-clicked": "update-ingredient";
+    let userIngredientsListStyle = (this.props.deleteMode)? {border: "3px solid #c20616"} : (this.props.updateMode)? {border: "3px solid #000030"} :{};
     //console.log(this.props.deleteMode);
     //console.log(removeButtonStyle);
     return (
@@ -49,6 +54,9 @@ class Ingredients extends Component {
             </div>
             <div className= {removeButtonStyle} onClick={(e)=>this.props.changeDeleteMode()}>
               Remove ingredient
+            </div>
+            <div className={updateButtonStyle} onClick={(e)=>this.props.changeUpdateMode()}>
+              Update ingredient
             </div>
           </div>
           <div className="user-ingredients-list" style={userIngredientsListStyle}>

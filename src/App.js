@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Ingredients from './Ingredients.js';
-import Friend from './Friend.js'
+import Recipes from './Recipes.js';
+import Friend from './Friend.js';
 import './App.css';
 import SweetAlert from 'react-bootstrap-sweetalert';
 
@@ -16,6 +17,8 @@ class App extends Component {
       userAlert: null,
       count: 0,
       deleteMode: false,
+      updateMode: false,
+      recipeList:[]
     }
     this.inputUser = this.inputUser.bind(this);
     this.onRecieveUser = this.onRecieveUser.bind(this);
@@ -33,6 +36,9 @@ class App extends Component {
     this.onRecieveIngredient = this.onRecieveIngredient.bind(this);
     this.removeIngredient = this.removeIngredient.bind(this);
     this.changeDeleteMode = this.changeDeleteMode.bind(this);
+    this.updateIngredient = this.updateIngredient.bind(this);
+    this.onRecieveUpdateIngredient = this.onRecieveUpdateIngredient.bind(this);
+    this.changeUpdateMode = this.changeUpdateMode.bind(this);
 
     this.apiUrl="http://18.220.42.114:8000/";
   }
@@ -134,6 +140,29 @@ class App extends Component {
   updateRecipe(){
     console.log('update the recipe and sent to the server');
     console.log(this.state.queue);
+    fetch(`${this.apiUrl}recommendation`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "ingredients":this.state.queue,
+      }),
+    }).then(this.checkStatus)
+    .then(response=>response.json())
+    .then(resObj=>{
+      console.log(resObj.data)
+      this.setState({recipeList:resObj.data});
+    })
+    .catch(error=>{
+        console.log('get recipe fail...')
+        console.log(error);
+        this.setState({
+          recipeList: []
+      })
+    });
+
   }
   fetchIngredients(){
     var friends= Object.assign([],this.state.users);
@@ -252,7 +281,58 @@ class App extends Component {
   }
   changeDeleteMode(){
     let d = this.state.deleteMode;
-    this.setState({deleteMode:!d});
+    this.setState({deleteMode:!d,updateMode:false});
+  }
+
+  updateIngredient(name){
+    let title = "Rename" + name
+    this.setState({userAlert:(<SweetAlert
+      input
+      showCancel
+      title= {title}
+      required
+      validationMsg="You must enter ingredient!"
+      onConfirm={(e)=>{this.onRecieveUpdateIngredient(e,name)}}
+      onCancel={this.hideAlert}
+      />)});
+    
+  }
+  onRecieveUpdateIngredient(value,name){
+    console.log(value,name)
+    let ingredients = [];
+    ingredients.push(value)
+    fetch(`${this.apiUrl}updateIngredients`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "user":this.state.user,
+        "old_name":name,
+        "new_name":value,
+      }),
+    }).then(this.checkStatus)
+    .then(response=>response.json())
+    .then(resObj=>{
+      this.setState({userAlert:(<SweetAlert
+        success
+        title="Finish"
+        onConfirm={this.hideUserAlert}
+      />)},()=>{this.fetchIngredients()});
+    })
+    .catch(error=>{
+        console.log('get list fail...')
+        console.log(error);
+        this.setState({
+          recipeList: []
+      })
+    });
+  }
+
+  changeUpdateMode(){
+    let u = this.state.updateMode;
+    this.setState({updateMode:!u,deleteMode:false});
   }
   render() {
     return (
@@ -279,16 +359,25 @@ class App extends Component {
               <Ingredients
                 ingredients={this.state.ingredients}
                 deleteMode = {this.state.deleteMode}
+                updateMode = {this.state.updateMode}
                 friendIngredients={this.state.friendIngredients}
                 updateQueue={this.updateQueue}
                 addIngredient={this.addIngredient}
                 removeIngredient={this.removeIngredient}
                 changeDeleteMode = {this.changeDeleteMode}
+                updateIngredient = {this.updateIngredient}
+                changeUpdateMode = {this.changeUpdateMode}
               ></Ingredients>
             </div>
           </div>
           <div className="recipe">
-            
+            <div>
+              <Recipes
+              receipes={this.state.recipeList}
+              >
+
+              </Recipes>
+            </div>
           </div>
         </div>
       </div>
