@@ -18,8 +18,21 @@ class App extends Component {
       count: 0,
       deleteMode: false,
       updateMode: false,
-      recipeList:[]
+      recipeList:[],
+      login: false,
+      username: '',
+      password: '',
+      token: '',
     }
+    //LOGIN
+    this.onUsernameChange = this.onUsernameChange.bind(this);
+    this.onPasswordChange = this.onPasswordChange.bind(this);
+    this.onCreateUserButtonClicked = this.onCreateUserButtonClicked.bind(this);
+    this.onReceiveUsername = this.onReceiveUsername.bind(this);
+    this.onReceivePassword = this.onReceivePassword.bind(this);
+    this.onLoginButtonClicked = this.onLoginButtonClicked.bind(this);
+
+    //MAIN
     this.inputUser = this.inputUser.bind(this);
     this.onRecieveUser = this.onRecieveUser.bind(this);
     
@@ -44,10 +57,13 @@ class App extends Component {
     this.addComment = this.addComment.bind(this);
     this.onRecieveComment = this.onRecieveComment.bind(this)
 
+    
+    
+
     this.apiUrl="http://18.220.42.114:8000/";
   }
   componentDidMount(){
-    this.inputUser();
+    //this.inputUser();
     
     //this.fetchIngredients();
   }
@@ -59,6 +75,96 @@ class App extends Component {
       error.response = response;
       throw error;
     }
+  }
+
+  onUsernameChange(e){
+    this.setState({username:e.target.value});
+  }
+  onPasswordChange(e){
+    this.setState({password:e.target.value});
+  }
+  onCreateUserButtonClicked(){
+    console.log("create clicked")
+    this.setState({userAlert:(<SweetAlert
+      input
+      showCancel
+      title="Username"
+      required
+      validationMsg="You must enter your name!"
+      onConfirm={this.onReceiveUsername}
+      onCancel={this.hideUserAlert}
+      />)
+    });
+  }
+  onReceiveUsername(name){
+    this.setState({userAlert:(<SweetAlert
+      input
+      showCancel
+      title="Password"
+      required
+      validationMsg="You must enter your password!"
+      onConfirm={(e)=>this.onReceivePassword(e,name)}
+      onCancel={this.hideUserAlert}
+      />)
+    });
+  }
+  onReceivePassword(password,name){
+    fetch(`${this.apiUrl}register`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "name":name,
+        "pwd":password
+      }),
+    }).then(this.checkStatus)
+    .then(response=>response.json())
+    .then(resObj=>{
+      console.log(resObj.token)
+      this.setState({userAlert:(<SweetAlert
+        success
+        title="Create Success"
+        onConfirm={this.hideUserAlert}
+      />)})
+    })
+    .catch(error=>{
+        console.log('Create Fail')
+        console.log(error);
+        this.setState({userAlert:(<SweetAlert
+          danger
+          title="Login Fail"
+          onConfirm={this.hideUserAlert}
+        />)})
+    });
+  }
+  onLoginButtonClicked(){
+    fetch(`${this.apiUrl}login`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "name":this.state.username,
+        "pwd":this.state.password
+      }),
+    }).then(this.checkStatus)
+    .then(response=>response.json())
+    .then(resObj=>{
+      console.log(resObj.token)
+      this.setState({token:resObj.token,login:true,user:this.state.username},this.fetchIngredients);
+    })
+    .catch(error=>{
+        console.log('Login Fail')
+        console.log(error);
+        this.setState({userAlert:(<SweetAlert
+          danger
+          title="Login Fail"
+          onConfirm={this.hideUserAlert}
+        />)})
+    });
   }
 
   inputUser(){
@@ -152,6 +258,7 @@ class App extends Component {
       },
       body: JSON.stringify({
         "ingredients":this.state.queue,
+        "token": this.state.token,
       }),
     }).then(this.checkStatus)
     .then(response=>response.json())
@@ -180,6 +287,7 @@ class App extends Component {
       body: JSON.stringify({
         "user":this.state.user,
         "friends":friends,
+        "token": this.state.token,
       }),
     }).then(this.checkStatus)
     .then(response=>response.json())
@@ -242,6 +350,7 @@ class App extends Component {
       body: JSON.stringify({
         "user":this.state.user,
         "ingredients":ingredients,
+        "token": this.state.token,
       }),
     }).then(this.checkStatus)
     .then(response=>response.json())
@@ -274,6 +383,7 @@ class App extends Component {
       body: JSON.stringify({
         "user":this.state.user,
         "ingredients":ingredients,
+        "token": this.state.token,
       }),
     }).then(this.checkStatus)
     .then(response=>response.json())
@@ -320,6 +430,7 @@ class App extends Component {
         "user":this.state.user,
         "old_name":name,
         "new_name":value,
+        "token": this.state.token,
       }),
     }).then(this.checkStatus)
     .then(response=>response.json())
@@ -367,6 +478,7 @@ class App extends Component {
         "user":this.state.user,
         "title":name,
         "comment":value,
+        "token": this.state.token,
       }),
     }).then(this.checkStatus)
     .then(response=>response.json())
@@ -387,53 +499,83 @@ class App extends Component {
         />)})
     });
   }
-
+  
   render() {
+    if(this.state.login){
+      return (
+        <div className="App">
+          <header className="App-header">
+            Overcooked
+            <div className="App-header-welcomeuser">
+              Welcome, {this.state.user}
+            </div>
+          </header>
+          {this.state.userAlert}
+          <div className="cooking-with">
+  
+            <Friend
+              friends = {this.state.users}
+              removeFriend = {this.removeFriend}
+              addFriend = {this.addFriend}
+            >
+            </Friend>
+          </div>
+          <div className="main-body">
+            <div className="ingredients">
+              <div>
+                <Ingredients
+                  ingredients={this.state.ingredients}
+                  deleteMode = {this.state.deleteMode}
+                  updateMode = {this.state.updateMode}
+                  friendIngredients={this.state.friendIngredients}
+                  updateQueue={this.updateQueue}
+                  addIngredient={this.addIngredient}
+                  removeIngredient={this.removeIngredient}
+                  changeDeleteMode = {this.changeDeleteMode}
+                  updateIngredient = {this.updateIngredient}
+                  changeUpdateMode = {this.changeUpdateMode}
+                ></Ingredients>
+              </div>
+            </div>
+            <div className="recipe">
+              <div>
+                <Recipes
+                  receipes={this.state.recipeList}
+                  addComment={this.addComment}
+                >
+  
+                </Recipes>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="App">
         <header className="App-header">
           Overcooked
-          <div className="App-header-welcomeuser">
-            Welcome, {this.state.user}
-          </div>
         </header>
         {this.state.userAlert}
-        <div className="cooking-with">
-
-          <Friend
-            friends = {this.state.users}
-            removeFriend = {this.removeFriend}
-            addFriend = {this.addFriend}
-          >
-          </Friend>
-        </div>
-        <div className="main-body">
-          <div className="ingredients">
-            <div>
-              <Ingredients
-                ingredients={this.state.ingredients}
-                deleteMode = {this.state.deleteMode}
-                updateMode = {this.state.updateMode}
-                friendIngredients={this.state.friendIngredients}
-                updateQueue={this.updateQueue}
-                addIngredient={this.addIngredient}
-                removeIngredient={this.removeIngredient}
-                changeDeleteMode = {this.changeDeleteMode}
-                updateIngredient = {this.updateIngredient}
-                changeUpdateMode = {this.changeUpdateMode}
-              ></Ingredients>
-            </div>
+        <div className="login-block">
+          <div className="login-title">Please LOGIN</div>
+          <div className="username-title">
+            UserName:
           </div>
-          <div className="recipe">
-            <div>
-              <Recipes
-                receipes={this.state.recipeList}
-                addComment={this.addComment}
-              >
-
-              </Recipes>
-            </div>
+          <input className="username-input" onChange={this.onUsernameChange} >
+          </input>
+          <div className="password-title">
+            password:
           </div>
+          <input className="password-input" onChange={this.onPasswordChange}>
+          </input>
+          <div className="login-button" onClick={this.onLoginButtonClicked}>
+            Login
+          </div>
+          <div className="create-account-button" onClick={this.onCreateUserButtonClicked}>
+            Create Account
+          </div>
+          
         </div>
       </div>
     );
