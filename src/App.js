@@ -40,6 +40,10 @@ class App extends Component {
     this.onRecieveUpdateIngredient = this.onRecieveUpdateIngredient.bind(this);
     this.changeUpdateMode = this.changeUpdateMode.bind(this);
 
+    //ADCANCED FUNCTION
+    this.addComment = this.addComment.bind(this);
+    this.onRecieveComment = this.onRecieveComment.bind(this)
+
     this.apiUrl="http://18.220.42.114:8000/";
   }
   componentDidMount(){
@@ -65,7 +69,7 @@ class App extends Component {
       required
       validationMsg="You must enter your name!"
       onConfirm={this.onRecieveUser}
-      onCancel={this.hideAlert}
+      onCancel={this.hideUserAlert}
       />)
     });
   }
@@ -118,7 +122,7 @@ class App extends Component {
       required
       validationMsg="You must enter your friend!"
       onConfirm={this.onRecieveFriend}
-      onCancel={this.hideAlert}
+      onCancel={this.hideUserAlert}
       />)
     });
   }
@@ -222,7 +226,7 @@ class App extends Component {
       required
       validationMsg="You must enter ingredient!"
       onConfirm={this.onRecieveIngredient}
-      onCancel={this.hideAlert}
+      onCancel={this.hideUserAlert}
       />)
     });
   }
@@ -249,11 +253,13 @@ class App extends Component {
       />)},()=>{this.fetchIngredients()});
     })
     .catch(error=>{
-        console.log('get list fail...')
-        console.log(error);
-        this.setState({
-          recipeList: []
-      })
+      console.log('get list fail...')
+      console.log(error);
+      this.setState({userAlert:(<SweetAlert
+        danger
+        title="We encounter server error"
+        onConfirm={this.hideUserAlert}
+      />)})
     });
   }
   removeIngredient(name){
@@ -277,6 +283,11 @@ class App extends Component {
     .catch(error=>{
       console.log('get list fail...')
       console.log(error);
+      this.setState({userAlert:(<SweetAlert
+        danger
+        title="We encounter server error"
+        onConfirm={this.hideUserAlert}
+      />)})
     });
   }
   changeDeleteMode(){
@@ -285,7 +296,7 @@ class App extends Component {
   }
 
   updateIngredient(name){
-    let title = "Rename" + name
+    let title = "Rename ingredient:" + name
     this.setState({userAlert:(<SweetAlert
       input
       showCancel
@@ -293,14 +304,12 @@ class App extends Component {
       required
       validationMsg="You must enter ingredient!"
       onConfirm={(e)=>{this.onRecieveUpdateIngredient(e,name)}}
-      onCancel={this.hideAlert}
+      onCancel={this.hideUserAlert}
       />)});
     
   }
   onRecieveUpdateIngredient(value,name){
-    console.log(value,name)
-    let ingredients = [];
-    ingredients.push(value)
+    //console.log(value,name)
     fetch(`${this.apiUrl}updateIngredients`, {
       method: 'post',
       headers: {
@@ -334,6 +343,51 @@ class App extends Component {
     let u = this.state.updateMode;
     this.setState({updateMode:!u,deleteMode:false});
   }
+
+  addComment(name){
+    let title = "Comment on \n" + name
+    this.setState({userAlert:(<SweetAlert
+      input
+      showCancel
+      title= {title}
+      required
+      validationMsg="You must enter Comment!"
+      onConfirm={(e)=>{this.onRecieveComment(e,name)}}
+      onCancel={this.hideUserAlert}
+      />)});
+  }
+  onRecieveComment(value,name){
+    fetch(`${this.apiUrl}insertComments`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "user":this.state.user,
+        "title":name,
+        "comment":value,
+      }),
+    }).then(this.checkStatus)
+    .then(response=>response.json())
+    .then(resObj=>{
+      this.setState({userAlert:(<SweetAlert
+        success
+        title="We received your comment :)"
+        onConfirm={this.hideUserAlert}
+      />)});
+    })
+    .catch(error=>{
+        console.log('get list fail...')
+        console.log(error);
+        this.setState({userAlert:(<SweetAlert
+          danger
+          title="We encounter server error"
+          onConfirm={this.hideUserAlert}
+        />)})
+    });
+  }
+
   render() {
     return (
       <div className="App">
@@ -373,7 +427,8 @@ class App extends Component {
           <div className="recipe">
             <div>
               <Recipes
-              receipes={this.state.recipeList}
+                receipes={this.state.recipeList}
+                addComment={this.addComment}
               >
 
               </Recipes>

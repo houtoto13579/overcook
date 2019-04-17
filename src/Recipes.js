@@ -2,7 +2,21 @@ import React, { Component } from 'react';
 class Recipes extends Component {
   constructor(){
     super();
-    this.createList = this.createList.bind(this);
+    //this.createTier = this.createTier.bind(this);
+    //this.createList = this.createList.bind(this);
+    this.addComment = this.addComment.bind(this);
+    this.createTag = this.createTag.bind(this);
+  }
+  addComment(){
+        
+
+  }
+  createTag(tag){
+    return(
+      <div className="tag" key={`tag-${tag}`}>
+        {tag}
+      </div>
+    )
   }
   createTier(recipes,index){
     let listArr = recipes;
@@ -21,6 +35,8 @@ class Recipes extends Component {
 
   createList(recipe){
     let blockType = "recipe-block-container"
+    let listArr = recipe.tags;
+    var listArrRender = listArr.map(x=>this.createTag(x));
     return (
         <div 
           className={blockType} 
@@ -30,6 +46,10 @@ class Recipes extends Component {
             <div className="recipe-name">
               {recipe.name}
             </div>
+            <div className="recipe-tags">
+              <div className = "tags-title">Comment Tag:</div>
+              {listArrRender}
+            </div>
             <div className="recipe-pic-container">
               <a href={recipe.link} target="_blank">
                 <img className="recipe-pic"
@@ -37,6 +57,9 @@ class Recipes extends Component {
                   alt={recipe.link}
                 />
               </a>
+            </div>
+            <div className="update-ingredient" onClick={()=>{this.props.addComment(recipe.name)}}>
+              Add Comment
             </div>
           </div>
         </div>
