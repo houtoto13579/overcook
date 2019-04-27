@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "gh-pages": "^2.0.1",
+    "https": "^1.0.0",
     "react": "^16.8.4",
     "react-bootstrap-sweetalert": "^4.4.1",
     "react-dom": "^16.8.4",
@@ -29,5 +30,5 @@
   "resolutions": {
     "ajv": "6.8.1"
   },
-  "homepage":"https://houtoto13579.github.io/overcook"
+  "homepage": "https://houtoto13579.github.io/overcook"
 }

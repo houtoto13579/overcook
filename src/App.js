@@ -4,7 +4,7 @@ import Recipes from './Recipes.js';
 import Friend from './Friend.js';
 import './App.css';
 import SweetAlert from 'react-bootstrap-sweetalert';
-
+import https from 'https';
 class App extends Component {
   constructor(){
     super();
@@ -119,6 +119,7 @@ class App extends Component {
         "name":name,
         "pwd":password
       }),
+      agent: new https.Agent({ rejectUnauthorized: false }),
     }).then(this.checkStatus)
     .then(response=>response.json())
     .then(resObj=>{
@@ -150,6 +151,8 @@ class App extends Component {
         "name":this.state.username,
         "pwd":this.state.password
       }),
+      agent: new https.Agent({ rejectUnauthorized: false }),
+      rejectUnauthorized: false,
     }).then(this.checkStatus)
     .then(response=>response.json())
     .then(resObj=>{
@@ -260,6 +263,7 @@ class App extends Component {
         "ingredients":this.state.queue,
         "token": this.state.token,
       }),
+      agent: new https.Agent({ rejectUnauthorized: false }),
     }).then(this.checkStatus)
     .then(response=>response.json())
     .then(resObj=>{
@@ -289,6 +293,7 @@ class App extends Component {
         "friends":friends,
         "token": this.state.token,
       }),
+      agent: new https.Agent({ rejectUnauthorized: false }),
     }).then(this.checkStatus)
     .then(response=>response.json())
     .then(resObj=>{
@@ -352,6 +357,7 @@ class App extends Component {
         "ingredients":ingredients,
         "token": this.state.token,
       }),
+      agent: new https.Agent({ rejectUnauthorized: false }),
     }).then(this.checkStatus)
     .then(response=>response.json())
     .then(resObj=>{
@@ -432,6 +438,7 @@ class App extends Component {
         "new_name":value,
         "token": this.state.token,
       }),
+      agent: new https.Agent({ rejectUnauthorized: false }),
     }).then(this.checkStatus)
     .then(response=>response.json())
     .then(resObj=>{
@@ -480,6 +487,7 @@ class App extends Component {
         "comment":value,
         "token": this.state.token,
       }),
+      agent: new https.Agent({ rejectUnauthorized: false }),
     }).then(this.checkStatus)
     .then(response=>response.json())
     .then(resObj=>{
@@ -564,10 +572,10 @@ class App extends Component {
           </div>
           <input className="username-input" onChange={this.onUsernameChange} >
           </input>
-          <div className="password-title">
+          <div className="password-title" >
             password:
           </div>
-          <input className="password-input" onChange={this.onPasswordChange}>
+          <input className="password-input" onChange={this.onPasswordChange} type="password">
           </input>
           <div className="login-button" onClick={this.onLoginButtonClicked}>
             Login
